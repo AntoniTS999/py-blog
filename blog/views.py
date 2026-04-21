@@ -12,7 +12,6 @@ class ListView(generic.ListView):
     context_object_name = "post_list"
     template_name = "blog/index.html"
 
-
     def get_queryset(self):
         return (Post.objects.select_related("owner")
                 .prefetch_related("comments"))
