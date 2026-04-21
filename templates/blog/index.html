@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <ul class="list-group" style="float: right">
+    <li class="list-group-item">User: {{ user.username }}</li>
+    <li class="list-group-item"><form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %} 
+        <button class="btn btn-info" type="submit">Logout</button>
+</form></li> 
+    {% else %}
+    <a style="float: right" href="{% url 'login' %}">Log in</a>
+  {% endif %}
+    </ul>
+  <h1 class="display-2">POSTS</h1>
+   <ul class="list-group">
+    {% for post in post_list %}
+    <li class="list-group-item list-group-item-secondary">
+      <h3><a href="{% url 'blog:post-detail' pk=post.id %}">Title: {{ post.title }}</a></h3>
+      <p>{{ post.content }}</p>
+      <p><strong>Author: </strong>{{ post.owner }}</p>
+      <p><strong>created: </strong>{{ post.created_time }}</p>    
+      <br>
+    </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
