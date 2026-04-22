@@ -1,16 +1,17 @@
 from django.urls import path
-from blog.views import (ListView,
+from blog.views import (PostListView,
                         PostDetailView,
                         CommentUpdateView,
-                        CommentDeleteView)
+                        CommentDeleteView,
+                        )
 
 urlpatterns = [
-    path("", ListView.as_view(), name="index"),
-    path("posts/<int:pk>", PostDetailView.as_view(), name="post-detail"),
-    path("posts/<int:pk>/update",
+    path("", PostListView.as_view(), name="index"),
+    path("posts/<int:pk>/", PostDetailView.as_view(), name="post-detail"),
+    path("comments/<int:pk>/update/",
          CommentUpdateView.as_view(),
          name="comment-update"),
-    path("posts/<int:pk>/delete",
+    path("comments/<int:pk>/delete/",
          CommentDeleteView.as_view(),
          name="comment-delete"),
 ]

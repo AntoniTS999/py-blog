@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.views import generic
@@ -6,7 +7,7 @@ from blog.forms import CommentForm
 from blog.models import Post, Commentary
 
 
-class ListView(generic.ListView):
+class PostListView(generic.ListView):
     model = Post
     paginate_by = 5
     context_object_name = "post_list"
@@ -29,29 +30,35 @@ class PostDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         post = self.get_object()
         context["counted"] = post.comments.count()
-        # Dodaj formularz do kontekstu dla żądania GET
         context["form"] = CommentForm()
         return context
 
     def post(self, request, *args, **kwargs):
         form = CommentForm(request.POST)
-        self.object = self.get_object()
+
         if form.is_valid():
             # Pobierz aktualny post
             post = self.get_object()
             # Utwórz nowy komentarz i przypisz do posta oraz użytkownika
             comment = form.save(commit=False)
             comment.post = post
-            if request.user.is_authenticated:
-                comment.user = request.user
-                comment.save()
-                return HttpResponseRedirect(reverse("blog:post-detail",
-                                                    kwargs={"pk": post.pk}))
+
+            if not request.user.is_authenticated:
+                form = CommentForm(request.POST)
+                form.add_error(None, "Only authorized users can comment")
+                context = {
+                    "form": form,
+                    "post": post,
+                }
+                return render(request, self.template_name, context=context)
             else:
-                return HttpResponseRedirect(reverse("login"))
+                comment.user = request.user
+            comment.save()
+            return HttpResponseRedirect(reverse("blog:post-detail",
+                                                kwargs={"pk": post.pk}))
 
 
-class CommentUpdateView(generic.UpdateView):
+class CommentUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Commentary
     form_class = CommentForm
     template_name = "blog/update_form.html"
@@ -68,10 +75,12 @@ class CommentDeleteView(generic.DeleteView):
     template_name = "blog/confirm_delete_form.html"
 
     def get_success_url(self):
-        return reverse_lazy(
-            "blog:post-detail",
-            kwargs={"pk": self.object.post.pk}
-        )
+        if self.object.user_id == self.request.user.pk:
+            return reverse_lazy(
+                "blog:post-detail",
+                kwargs={"pk": self.object.post.pk}
+            )
+        return reverse_lazy("blog:post-detail", pk=self.object.post.pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
