@@ -2,8 +2,6 @@
 {% load crispy_forms_filters %}
 
 {% block content %}
-  <p>{{ comment.user }}</p>
-
   <form action="" method="post" novalidate>
     {% csrf_token %}
     <div class="form-title">
