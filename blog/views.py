@@ -1,10 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView
-
 from blog.forms import CommentForm
 from blog.models import Post, Commentary
 

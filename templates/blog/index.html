@@ -21,7 +21,10 @@
       <p><strong>Author: </strong>{{ post.owner }}</p>
       <p><strong>created: </strong>{{ post.created_time }}</p>    
       <br>
+    <p
+style="background: linear-gradient(135deg, #6366f1, #22c55e); color: #ffffff;"><a class="p-3" style="color: whitesmoke" href="{% url 'blog:post-detail' pk=post.id%}">Comments: {{ post.comments.count }}</a></p>
     </li>
+      <br>
     {% endfor %}
   </ul>
 {% endblock %}
