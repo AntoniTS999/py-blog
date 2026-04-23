@@ -2,6 +2,7 @@
 {% load crispy_forms_filters %}
 
 {% block content %}
+
   <div class="shadow p-3 mb-5 bg-body-tertiary rounded">
   <a class="btn btn-outline-dark mb-5" href="{% url 'blog:index' %}">BACK</a>
   <h5 class="pl-5 mx-auto">{{ post.title }}</h5>
@@ -9,7 +10,7 @@
   <p class="pl-5 mx-auto">{{ post.content }}</p>
   </div>
   <h5>Comment{{ counted|pluralize }}: {{counted}}</h5>
-  {% if not post.comments.all %}
+  {% if not post.comments.exists %}
     <p><em>There are no comments yet.</em></p>
   {% endif %}
     <ul class="list-group">

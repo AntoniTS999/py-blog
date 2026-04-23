@@ -1,8 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView
+
 from blog.forms import CommentForm
 from blog.models import Post, Commentary
 
@@ -21,6 +23,7 @@ class PostListView(generic.ListView):
 class PostDetailView(generic.DetailView):
     model = Post
     template_name = "blog/post_detail.html"
+    context_object_name = "post"
 
     def get_queryset(self):
         return (Post.objects.select_related("owner")
@@ -28,34 +31,32 @@ class PostDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        post = self.get_object()
+        post = self.object
+
         context["counted"] = post.comments.count()
         context["form"] = CommentForm()
         return context
 
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
         form = CommentForm(request.POST)
 
-        if form.is_valid():
-            # Pobierz aktualny post
-            post = self.get_object()
-            # Utwórz nowy komentarz i przypisz do posta oraz użytkownika
+        if form.is_valid() and request.user.is_authenticated:
             comment = form.save(commit=False)
-            comment.post = post
-
-            if not request.user.is_authenticated:
-                form = CommentForm(request.POST)
-                form.add_error(None, "Only authorized users can comment")
-                context = {
-                    "form": form,
-                    "post": post,
-                }
-                return render(request, self.template_name, context=context)
-            else:
-                comment.user = request.user
+            comment.post = self.object
+            comment.user = request.user
             comment.save()
-            return HttpResponseRedirect(reverse("blog:post-detail",
-                                                kwargs={"pk": post.pk}))
+
+            return HttpResponseRedirect(
+                reverse("blog:post-detail", args=(self.object.id,))
+            )
+
+        context = {
+            "form": form,
+            "post": self.object,
+        }
+        return render(request, self.template_name, context=context)
 
 
 class CommentUpdateView(LoginRequiredMixin, generic.UpdateView):
