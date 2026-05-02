@@ -14,7 +14,8 @@ class PostListView(generic.ListView):
     template_name = "blog/index.html"
 
     def get_queryset(self):
-        queryset = Post.objects.select_related("owner").prefetch_related("comments")
+        queryset = (Post.objects.select_related("owner").
+                    prefetch_related("comments"))
         title = self.request.GET.get("title")
         if title:
             return queryset.filter(title__icontains=title)
@@ -24,7 +25,6 @@ class PostListView(generic.ListView):
         context = super(PostListView, self).get_context_data(**kwargs)
         context["search_field"] = SearchForm()
         return context
-
 
 
 class PostDetailView(generic.DetailView):
@@ -88,7 +88,6 @@ class CommentDeleteView(generic.DeleteView):
                 "blog:post-detail",
                 kwargs={"pk": self.object.post.pk}
             )
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
