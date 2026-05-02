@@ -88,7 +88,7 @@ class CommentDeleteView(generic.DeleteView):
                 "blog:post-detail",
                 kwargs={"pk": self.object.post.pk}
             )
-        return reverse_lazy("blog:post-detail", pk=self.object.post.pk)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
