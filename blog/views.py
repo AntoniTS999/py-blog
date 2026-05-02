@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse, reverse_lazy
-from blog.forms import CommentForm
+from blog.forms import CommentForm, SearchForm
 from blog.models import Post, Commentary
 
 
@@ -14,8 +14,17 @@ class PostListView(generic.ListView):
     template_name = "blog/index.html"
 
     def get_queryset(self):
-        return (Post.objects.select_related("owner")
-                .prefetch_related("comments"))
+        queryset = Post.objects.select_related("owner").prefetch_related("comments")
+        title = self.request.GET.get("title")
+        if title:
+            return queryset.filter(title__icontains=title)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(PostListView, self).get_context_data(**kwargs)
+        context["search_field"] = SearchForm()
+        return context
+
 
 
 class PostDetailView(generic.DetailView):

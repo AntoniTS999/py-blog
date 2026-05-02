@@ -8,7 +8,7 @@
   {% endif %}
   <form action="{% url 'login' %}" method="post">
   {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    <input type="hidden" name="next" value="{{ next }}">
     {{ form|crispy }}
     <br>
     <input type="submit" value="Submit">

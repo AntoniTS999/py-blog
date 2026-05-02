@@ -8,3 +8,6 @@ class CommentForm(forms.ModelForm):
         model = Commentary
         fields = ("content",)
         labels = {"content": ""}
+
+class SearchForm(forms.Form):
+    title = forms.CharField(label="", max_length=255, required=False, widget=forms.TextInput(attrs={"placeholder": "Search by title"}))
